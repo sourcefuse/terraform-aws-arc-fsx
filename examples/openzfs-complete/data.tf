@@ -14,8 +14,7 @@ data "aws_subnets" "private" {
   }
 
   filter {
-    name = "tag:Name"
-    # values = ["arc-poc-private-subnet-private-us-east-1a"]
+    name   = "tag:Name"
     values = ["*private*"]
   }
 }

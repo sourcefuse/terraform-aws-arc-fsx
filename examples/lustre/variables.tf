@@ -18,29 +18,3 @@ variable "namespace" {
   default     = "arc"
   description = "Namespace of the project, i.e. arc"
 }
-
-# variable "vpc_id" {
-#   description = "VPC ID where FSx will be deployed"
-#   type        = string
-# }
-
-# variable "subnet_ids" {
-#   description = "List of subnet IDs for FSx deployment"
-#   type        = list(string)
-# }
-
-# variable "s3_import_path" {
-#   description = "S3 path for importing data to Lustre"
-#   type        = string
-# }
-
-# variable "s3_export_path" {
-#   description = "S3 path for exporting data from Lustre"
-#   type        = string
-# }
-
-# variable "allowed_cidr_blocks" {
-#   description = "CIDR blocks allowed to access FSx"
-#   type        = list(string)
-#   default     = ["10.0.0.0/8"]
-# }

@@ -34,21 +34,7 @@ locals {
   openzfs_config    = var.openzfs_configuration
   iam_config        = var.iam_configuration
   file_cache_config = var.file_cache_configuration
-}
 
-
-# locals {
-#   is_lustre_s3_linked = (
-#     var.fsx_type == "lustre" &&
-#     (
-#       var.import_path != null ||
-#       var.export_path != null ||
-#       length(var.data_repository_associations) > 0
-#     )
-#   )
-# }
-
-locals {
   is_lustre       = var.fsx_type == "lustre"
   is_persistent_2 = local.is_lustre && var.deployment_type == "PERSISTENT_2"
 
@@ -59,5 +45,7 @@ locals {
   )
 
   enable_lustre_config_at_create = local.is_lustre && !local.is_persistent_2
+
 }
+
 

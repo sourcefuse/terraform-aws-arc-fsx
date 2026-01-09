@@ -94,10 +94,8 @@ module "fsx_windows_self_managed" {
   # Windows Configuration
   windows_configuration = {
     self_managed_active_directory = {
-      dns_ips     = var.ad_dns_ips
-      domain_name = var.ad_domain_name
-      # password                               = var.ad_password
-      # username                               = var.ad_username
+      dns_ips                                = var.ad_dns_ips
+      domain_name                            = var.ad_domain_name
       username                               = local.ad_credentials.username
       password                               = local.ad_credentials.password
       file_system_administrators_group       = var.ad_admin_group
@@ -110,10 +108,10 @@ module "fsx_windows_self_managed" {
   }
 
   # Backup Configuration
-  # backup_configuration = {
-  #   automatic_backup_retention_days   = 7
-  #   daily_automatic_backup_start_time = "02:00"
-  # }
+  backup_configuration = {
+    automatic_backup_retention_days   = 7
+    daily_automatic_backup_start_time = "02:00"
+  }
 
   weekly_maintenance_start_time = "1:03:00"
 

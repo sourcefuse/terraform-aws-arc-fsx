@@ -51,50 +51,10 @@ resource "aws_fsx_windows_file_system" "this" {
   }
 }
 
-# resource "aws_fsx_lustre_file_system" "this" {
-#   count = var.create && var.fsx_type == "lustre" ? 1 : 0
-
-#   storage_capacity            = var.storage_capacity
-#   subnet_ids                  = var.subnet_ids
-#   deployment_type             = var.deployment_type
-#   storage_type                = var.storage_type
-#   kms_key_id                  = var.kms_key_id
-#   per_unit_storage_throughput = var.per_unit_storage_throughput
-#   copy_tags_to_backups        = var.copy_tags_to_backups
-#   skip_final_backup           = var.skip_final_backup
-#   final_backup_tags           = var.final_backup_tags
-
-#   import_path              = var.import_path
-#   export_path              = var.export_path
-#   imported_file_chunk_size = var.imported_file_chunk_size
-#   auto_import_policy       = var.auto_import_policy
-#   data_compression_type    = var.data_compression_type
-#   drive_cache_type         = var.drive_cache_type
-
-#   dynamic "log_configuration" {
-#     for_each = var.log_configuration != null ? [var.log_configuration] : []
-#     content {
-#       destination = log_configuration.value.destination
-#       level       = log_configuration.value.level
-#     }
-#   }
-
-#   # automatic_backup_retention_days   = var.automatic_backup_retention_days
-#   automatic_backup_retention_days = local.is_lustre_s3_linked ? 0 : var.automatic_backup_retention_days
-
-#   # daily_automatic_backup_start_time = var.daily_automatic_backup_start_time
-#   daily_automatic_backup_start_time = local.is_lustre_s3_linked ? null : var.daily_automatic_backup_start_time
-#   weekly_maintenance_start_time     = var.weekly_maintenance_start_time
-#   security_group_ids                = local.security_group_ids
-
-#   tags = local.tags
-# }
 resource "aws_fsx_lustre_file_system" "this" {
   count = var.create && local.is_lustre ? 1 : 0
 
-  # ---------------------------------------------------------------------------
   # REQUIRED / CORE
-  # ---------------------------------------------------------------------------
   subnet_ids       = var.subnet_ids
   storage_capacity = var.storage_capacity
 
@@ -105,16 +65,12 @@ resource "aws_fsx_lustre_file_system" "this" {
   security_group_ids = local.security_group_ids
   tags               = local.tags
 
-  # ---------------------------------------------------------------------------
   # PERFORMANCE
-  # ---------------------------------------------------------------------------
   per_unit_storage_throughput = local.lustre_config.per_unit_storage_throughput
   throughput_capacity         = var.throughput_capacity
   efa_enabled                 = local.lustre_config.efa_enabled
 
-  # ---------------------------------------------------------------------------
   # BACKUPS (auto-disabled for S3-linked)
-  # ---------------------------------------------------------------------------
   automatic_backup_retention_days = local.is_lustre_s3_linked ? 0 : local.backup_config.automatic_backup_retention_days
 
   daily_automatic_backup_start_time = local.is_lustre_s3_linked ? null : local.backup_config.daily_automatic_backup_start_time
@@ -125,9 +81,7 @@ resource "aws_fsx_lustre_file_system" "this" {
   skip_final_backup    = local.backup_config.skip_final_backup
   final_backup_tags    = local.backup_config.final_backup_tags
 
-  # ---------------------------------------------------------------------------
   # LUSTRE CONFIGURATION (ONLY for non-PERSISTENT_2)
-  # ---------------------------------------------------------------------------
   import_path = local.enable_lustre_config_at_create ? local.lustre_config.import_path : null
 
   export_path = local.enable_lustre_config_at_create ? local.lustre_config.export_path : null
@@ -139,9 +93,7 @@ resource "aws_fsx_lustre_file_system" "this" {
   data_compression_type = local.lustre_config.data_compression_type
   drive_cache_type      = local.lustre_config.drive_cache_type
 
-  # ---------------------------------------------------------------------------
   # LOG CONFIGURATION
-  # ---------------------------------------------------------------------------
   dynamic "log_configuration" {
     for_each = local.lustre_config.log_configuration != null ? [local.lustre_config.log_configuration] : []
     content {
@@ -150,9 +102,7 @@ resource "aws_fsx_lustre_file_system" "this" {
     }
   }
 
-  # ---------------------------------------------------------------------------
   # METADATA CONFIGURATION (PERSISTENT_2 ONLY)
-  # ---------------------------------------------------------------------------
   dynamic "metadata_configuration" {
     for_each = local.is_persistent_2 && local.lustre_config.metadata_configuration != null ? [local.lustre_config.metadata_configuration] : []
     content {
@@ -161,9 +111,7 @@ resource "aws_fsx_lustre_file_system" "this" {
     }
   }
 
-  # ---------------------------------------------------------------------------
   # ROOT SQUASH
-  # ---------------------------------------------------------------------------
   dynamic "root_squash_configuration" {
     for_each = local.lustre_config.root_squash_configuration != null ? [local.lustre_config.root_squash_configuration] : []
     content {
@@ -172,9 +120,7 @@ resource "aws_fsx_lustre_file_system" "this" {
     }
   }
 
-  # ---------------------------------------------------------------------------
   # DATA READ CACHE (INTELLIGENT_TIERING)
-  # ---------------------------------------------------------------------------
   dynamic "data_read_cache_configuration" {
     for_each = local.lustre_config.data_read_cache_configuration != null ? [local.lustre_config.data_read_cache_configuration] : []
     content {
@@ -235,66 +181,6 @@ resource "aws_fsx_ontap_file_system" "this" {
   tags = local.tags
 }
 
-# resource "aws_fsx_openzfs_file_system" "this" {
-#   count = var.create && var.fsx_type == "openzfs" ? 1 : 0
-
-#   storage_capacity     = var.storage_capacity
-#   subnet_ids           = var.subnet_ids
-#   deployment_type      = var.deployment_type
-#   throughput_capacity  = var.throughput_capacity
-#   storage_type         = var.storage_type
-#   kms_key_id           = var.kms_key_id
-#   copy_tags_to_backups = var.copy_tags_to_backups
-#   skip_final_backup    = var.skip_final_backup
-#   final_backup_tags    = var.final_backup_tags
-
-#   dynamic "disk_iops_configuration" {
-#     for_each = var.disk_iops_configuration != null ? [var.disk_iops_configuration] : []
-#     content {
-#       mode = disk_iops_configuration.value.mode
-#       iops = lookup(disk_iops_configuration.value, "iops", null)
-#     }
-#   }
-
-#   dynamic "root_volume_configuration" {
-#     for_each = var.root_volume_configuration != null ? [var.root_volume_configuration] : []
-#     content {
-#       copy_tags_to_snapshots = lookup(root_volume_configuration.value, "copy_tags_to_snapshots", null)
-#       data_compression_type  = lookup(root_volume_configuration.value, "data_compression_type", null)
-#       read_only              = lookup(root_volume_configuration.value, "read_only", null)
-#       record_size_kib        = lookup(root_volume_configuration.value, "record_size_kib", null)
-
-#       dynamic "nfs_exports" {
-#         for_each = lookup(root_volume_configuration.value, "nfs_exports", [])
-#         content {
-#           dynamic "client_configurations" {
-#             for_each = nfs_exports.value.client_configurations
-#             content {
-#               clients = client_configurations.value.clients
-#               options = client_configurations.value.options
-#             }
-#           }
-#         }
-#       }
-
-#       dynamic "user_and_group_quotas" {
-#         for_each = lookup(root_volume_configuration.value, "user_and_group_quotas", [])
-#         content {
-#           id                         = user_and_group_quotas.value.id
-#           storage_capacity_quota_gib = user_and_group_quotas.value.storage_capacity_quota_gib
-#           type                       = user_and_group_quotas.value.type
-#         }
-#       }
-#     }
-#   }
-
-#   automatic_backup_retention_days   = var.automatic_backup_retention_days
-#   daily_automatic_backup_start_time = var.daily_automatic_backup_start_time
-#   weekly_maintenance_start_time     = var.weekly_maintenance_start_time
-#   security_group_ids                = local.security_group_ids
-
-#   tags = local.tags
-# }
 
 resource "aws_fsx_openzfs_file_system" "this" {
   count = var.create && var.fsx_type == "openzfs" ? 1 : 0
@@ -317,43 +203,6 @@ resource "aws_fsx_openzfs_file_system" "this" {
     }
   }
 
-  # dynamic "root_volume_configuration" {
-  #   for_each = var.root_volume_configuration != null ? [var.root_volume_configuration] : []
-  #   content {
-  #     copy_tags_to_snapshots = try(root_volume_configuration.value.copy_tags_to_snapshots, null)
-  #     data_compression_type  = try(root_volume_configuration.value.data_compression_type, null)
-  #     read_only              = try(root_volume_configuration.value.read_only, null)
-  #     record_size_kib        = try(root_volume_configuration.value.record_size_kib, null)
-
-  #     # -------------------------
-  #     # NFS EXPORTS
-  #     # -------------------------
-  #     dynamic "nfs_exports" {
-  #       for_each = try(root_volume_configuration.value.nfs_exports, [])
-  #       content {
-  #         dynamic "client_configurations" {
-  #           for_each = nfs_exports.value.client_configurations
-  #           content {
-  #             clients = client_configurations.value.clients
-  #             options = client_configurations.value.options
-  #           }
-  #         }
-  #       }
-  #     }
-
-  #     # -------------------------
-  #     # USER & GROUP QUOTAS
-  #     # -------------------------
-  #     dynamic "user_and_group_quotas" {
-  #       for_each = try(root_volume_configuration.value.user_and_group_quotas, [])
-  #       content {
-  #         id                         = user_and_group_quotas.value.id
-  #         storage_capacity_quota_gib = user_and_group_quotas.value.storage_capacity_quota_gib
-  #         type                       = user_and_group_quotas.value.type
-  #       }
-  #     }
-  #   }
-  # }
   dynamic "root_volume_configuration" {
     for_each = local.openzfs_config.root_volume_configuration != null ? [local.openzfs_config.root_volume_configuration] : []
     content {
@@ -564,62 +413,28 @@ resource "aws_fsx_ontap_storage_virtual_machine" "this" {
 # ONTAP Volume
 ################################################################################
 
-# resource "aws_fsx_ontap_volume" "this" {
-#   for_each = var.create && var.fsx_type == "ontap" ? var.ontap_volumes : {}
-
-#   name                       = each.value.name
-#   storage_virtual_machine_id = aws_fsx_ontap_storage_virtual_machine.this[each.value.svm_name].id
-#   size_in_megabytes          = each.value.size_in_megabytes
-#   storage_efficiency_enabled = lookup(each.value, "storage_efficiency_enabled", true)
-#   junction_path              = lookup(each.value, "junction_path", null)
-#   security_style             = lookup(each.value, "security_style", "UNIX")
-#   volume_type                = lookup(each.value, "volume_type", "RW")
-#   ontap_volume_type          = lookup(each.value, "ontap_volume_type", "RW")
-#   copy_tags_to_backups       = lookup(each.value, "copy_tags_to_backups", false)
-#   skip_final_backup          = lookup(each.value, "skip_final_backup", false)
-#   final_backup_tags          = lookup(each.value, "final_backup_tags", {})
-
-#   dynamic "tiering_policy" {
-#     for_each = lookup(each.value, "tiering_policy", null) != null ? [each.value.tiering_policy] : []
-#     content {
-#       cooling_period = lookup(tiering_policy.value, "cooling_period", null)
-#       name           = lookup(tiering_policy.value, "name", "SNAPSHOT_ONLY")
-#     }
-#   }
-
-#   tags = local.tags
-# }
-
 resource "aws_fsx_ontap_volume" "this" {
   for_each = var.create && var.fsx_type == "ontap" ? local.ontap_config.volumes : {}
 
-  # ---------------------------------------------------------------------------
   # Required
-  # ---------------------------------------------------------------------------
   name = replace(each.value.name, "-", "_")
 
   storage_virtual_machine_id = aws_fsx_ontap_storage_virtual_machine.this[
     each.value.svm_name
   ].id
 
-  # ---------------------------------------------------------------------------
   # Size (one of these is required by AWS)
-  # ---------------------------------------------------------------------------
   size_in_megabytes = lookup(each.value, "size_in_megabytes", null)
   size_in_bytes     = lookup(each.value, "size_in_bytes", null)
 
-  # ---------------------------------------------------------------------------
   # REQUIRED for ONTAP (no default in AWS API)
-  # ---------------------------------------------------------------------------
   storage_efficiency_enabled = lookup(
     each.value,
     "storage_efficiency_enabled",
     true
   )
 
-  # ---------------------------------------------------------------------------
   # Optional top-level attributes
-  # ---------------------------------------------------------------------------
   junction_path        = lookup(each.value, "junction_path", null)
   security_style       = lookup(each.value, "security_style", null)
   volume_style         = lookup(each.value, "volume_style", "FLEXVOL")
@@ -634,9 +449,7 @@ resource "aws_fsx_ontap_volume" "this" {
     false
   )
 
-  # ---------------------------------------------------------------------------
   # Aggregate Configuration (FLEXGROUP only)
-  # ---------------------------------------------------------------------------
   dynamic "aggregate_configuration" {
     for_each = lookup(each.value, "aggregate_configuration", null) != null ? [each.value.aggregate_configuration] : []
 
@@ -650,9 +463,7 @@ resource "aws_fsx_ontap_volume" "this" {
     }
   }
 
-  # ---------------------------------------------------------------------------
   # SnapLock Configuration
-  # ---------------------------------------------------------------------------
   dynamic "snaplock_configuration" {
     for_each = lookup(each.value, "snaplock_configuration", null) != null ? [each.value.snaplock_configuration] : []
 
@@ -711,9 +522,7 @@ resource "aws_fsx_ontap_volume" "this" {
     }
   }
 
-  # ---------------------------------------------------------------------------
   # Tiering Policy
-  # ---------------------------------------------------------------------------
   dynamic "tiering_policy" {
     for_each = lookup(each.value, "tiering_policy", null) != null ? [each.value.tiering_policy] : []
 
@@ -723,10 +532,6 @@ resource "aws_fsx_ontap_volume" "this" {
     }
   }
 
-
-  # ---------------------------------------------------------------------------
-  # Tags (sanitized for FSx + SSM)
-  # ---------------------------------------------------------------------------
   tags = local.tags
 }
 
@@ -734,51 +539,6 @@ resource "aws_fsx_ontap_volume" "this" {
 ################################################################################
 # OpenZFS Volume
 ################################################################################
-
-# resource "aws_fsx_openzfs_volume" "this" {
-#   for_each = var.create && var.fsx_type == "openzfs" ? var.openzfs_volumes : {}
-
-#   name                             = each.value.name
-#   parent_volume_id                 = lookup(each.value, "parent_volume_id", aws_fsx_openzfs_file_system.this[0].root_volume_id)
-#   storage_capacity_quota_gib       = lookup(each.value, "storage_capacity_quota_gib", null)
-#   storage_capacity_reservation_gib = lookup(each.value, "storage_capacity_reservation_gib", null)
-#   copy_tags_to_snapshots           = lookup(each.value, "copy_tags_to_snapshots", false)
-#   data_compression_type            = lookup(each.value, "data_compression_type", "NONE")
-#   read_only                        = lookup(each.value, "read_only", false)
-#   record_size_kib                  = lookup(each.value, "record_size_kib", 128)
-
-#   dynamic "nfs_exports" {
-#     for_each = lookup(each.value, "nfs_exports", [])
-#     content {
-#       dynamic "client_configurations" {
-#         for_each = nfs_exports.value.client_configurations
-#         content {
-#           clients = client_configurations.value.clients
-#           options = client_configurations.value.options
-#         }
-#       }
-#     }
-#   }
-
-#   # dynamic "user_and_group_quotas" {
-#   #   for_each = lookup(each.value, "user_and_group_quotas", [])
-#   #   content {
-#   #     id                         = user_and_group_quotas.value.id
-#   #     storage_capacity_quota_gib = user_and_group_quotas.value.storage_capacity_quota_gib
-#   #     type                       = user_and_group_quotas.value.type
-#   #   }
-#   # }
-#   dynamic "user_and_group_quotas" {
-#     for_each = try(each.value.user_and_group_quotas, [])
-#     content {
-#       id                         = user_and_group_quotas.value.id
-#       storage_capacity_quota_gib = user_and_group_quotas.value.storage_capacity_quota_gib
-#       type                       = user_and_group_quotas.value.type
-#     }
-#   }
-
-#   tags = local.tags
-# }
 
 resource "aws_fsx_openzfs_volume" "this" {
   for_each = var.create && var.fsx_type == "openzfs" ? local.openzfs_config.volumes : {}
@@ -798,9 +558,7 @@ resource "aws_fsx_openzfs_volume" "this" {
 
   delete_volume_options = try(each.value.delete_volume_options, [])
 
-  # --------------------------
   # NFS EXPORTS
-  # --------------------------
   dynamic "nfs_exports" {
     for_each = try(each.value.nfs_exports, [])
     content {
@@ -814,9 +572,7 @@ resource "aws_fsx_openzfs_volume" "this" {
     }
   }
 
-  # --------------------------
   # ORIGIN SNAPSHOT
-  # --------------------------
   dynamic "origin_snapshot" {
     for_each = each.value.origin_snapshot != null ? [each.value.origin_snapshot] : []
     content {
@@ -825,9 +581,7 @@ resource "aws_fsx_openzfs_volume" "this" {
     }
   }
 
-  # --------------------------
   # USER & GROUP QUOTAS
-  # --------------------------
   dynamic "user_and_group_quotas" {
     for_each = try(each.value.user_and_group_quotas, [])
     content {
@@ -859,18 +613,6 @@ resource "aws_fsx_openzfs_snapshot" "this" {
 ################################################################################
 # FSx Backup
 ################################################################################
-
-# resource "aws_fsx_backup" "this" {
-#   for_each = var.create ? var.fsx_backups : {}
-
-#   file_system_id = local.fsx_id
-#   volume_id      = lookup(each.value, "volume_id", null)
-
-#   tags = merge(local.tags, {
-#     Name = "${local.name_prefix}-backup-${each.key}"
-#   })
-# }
-
 
 resource "aws_fsx_backup" "this" {
   for_each = var.create && var.fsx_type != "ontap" ? var.fsx_backups : {}

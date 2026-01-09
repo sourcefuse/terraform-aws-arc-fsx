@@ -30,17 +30,6 @@ variable "ad_domain_name" {
   type        = string
 }
 
-# variable "ad_password" {
-#   description = "Password for AD service account"
-#   type        = string
-#   sensitive   = true
-# }
-
-# variable "ad_username" {
-#   description = "Username for AD service account"
-#   type        = string
-# }
-
 variable "ad_admin_group" {
   description = "AD group for file system administrators"
   type        = string
