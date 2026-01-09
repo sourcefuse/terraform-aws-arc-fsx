@@ -111,12 +111,12 @@ output "openzfs_root_volume_id" {
 
 output "iam_role_arn" {
   description = "ARN of the created IAM role"
-  value       = var.create_iam_role && length(aws_iam_role.this) > 0 ? aws_iam_role.this[0].arn : null
+  value       = local.iam_config.create_iam_role && length(aws_iam_role.this) > 0 ? aws_iam_role.this[0].arn : null
 }
 
 output "iam_role_name" {
   description = "Name of the created IAM role"
-  value       = var.create_iam_role && length(aws_iam_role.this) > 0 ? aws_iam_role.this[0].name : null
+  value       = local.iam_config.create_iam_role && length(aws_iam_role.this) > 0 ? aws_iam_role.this[0].name : null
 }
 
 ################################################################################
@@ -148,17 +148,17 @@ output "tags" {
 
 output "file_cache_id" {
   description = "ID of the FSx File Cache"
-  value       = var.create_file_cache && length(aws_fsx_file_cache.this) > 0 ? aws_fsx_file_cache.this[0].id : null
+  value       = local.file_cache_config.create_file_cache && length(aws_fsx_file_cache.this) > 0 ? aws_fsx_file_cache.this[0].id : null
 }
 
 output "file_cache_dns_name" {
   description = "DNS name of the FSx File Cache"
-  value       = var.create_file_cache && length(aws_fsx_file_cache.this) > 0 ? aws_fsx_file_cache.this[0].dns_name : null
+  value       = local.file_cache_config.create_file_cache && length(aws_fsx_file_cache.this) > 0 ? aws_fsx_file_cache.this[0].dns_name : null
 }
 
 output "file_cache_network_interface_ids" {
   description = "Network interface IDs of the FSx File Cache"
-  value       = var.create_file_cache && length(aws_fsx_file_cache.this) > 0 ? aws_fsx_file_cache.this[0].network_interface_ids : []
+  value       = local.file_cache_config.create_file_cache && length(aws_fsx_file_cache.this) > 0 ? aws_fsx_file_cache.this[0].network_interface_ids : []
 }
 
 ################################################################################

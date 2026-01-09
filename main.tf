@@ -12,14 +12,14 @@ resource "aws_fsx_windows_file_system" "this" {
   preferred_subnet_id  = var.preferred_subnet_id
   storage_type         = var.storage_type
   kms_key_id           = var.kms_key_id
-  copy_tags_to_backups = var.copy_tags_to_backups
-  skip_final_backup    = var.skip_final_backup
-  final_backup_tags    = var.final_backup_tags
+  copy_tags_to_backups = local.backup_config.copy_tags_to_backups
+  skip_final_backup    = local.backup_config.skip_final_backup
+  final_backup_tags    = local.backup_config.final_backup_tags
 
-  active_directory_id = var.active_directory_id
+  active_directory_id = local.windows_config.active_directory_id
 
   dynamic "self_managed_active_directory" {
-    for_each = var.self_managed_active_directory != null ? [var.self_managed_active_directory] : []
+    for_each = local.windows_config.self_managed_active_directory != null ? [local.windows_config.self_managed_active_directory] : []
     content {
       dns_ips                                = self_managed_active_directory.value.dns_ips
       domain_name                            = self_managed_active_directory.value.domain_name
@@ -31,7 +31,7 @@ resource "aws_fsx_windows_file_system" "this" {
   }
 
   dynamic "audit_log_configuration" {
-    for_each = var.audit_log_configuration != null ? [var.audit_log_configuration] : []
+    for_each = local.windows_config.audit_log_configuration != null ? [local.windows_config.audit_log_configuration] : []
     content {
       file_access_audit_log_level       = audit_log_configuration.value.file_access_audit_log_level
       file_share_access_audit_log_level = audit_log_configuration.value.file_share_access_audit_log_level
@@ -39,8 +39,8 @@ resource "aws_fsx_windows_file_system" "this" {
     }
   }
 
-  automatic_backup_retention_days   = var.automatic_backup_retention_days
-  daily_automatic_backup_start_time = var.daily_automatic_backup_start_time
+  automatic_backup_retention_days   = local.backup_config.automatic_backup_retention_days
+  daily_automatic_backup_start_time = local.backup_config.daily_automatic_backup_start_time
   weekly_maintenance_start_time     = var.weekly_maintenance_start_time
   security_group_ids                = local.security_group_ids
 
@@ -108,42 +108,42 @@ resource "aws_fsx_lustre_file_system" "this" {
   # ---------------------------------------------------------------------------
   # PERFORMANCE
   # ---------------------------------------------------------------------------
-  per_unit_storage_throughput = var.per_unit_storage_throughput
+  per_unit_storage_throughput = local.lustre_config.per_unit_storage_throughput
   throughput_capacity         = var.throughput_capacity
-  efa_enabled                 = var.efa_enabled
+  efa_enabled                 = local.lustre_config.efa_enabled
 
   # ---------------------------------------------------------------------------
   # BACKUPS (auto-disabled for S3-linked)
   # ---------------------------------------------------------------------------
-  automatic_backup_retention_days = local.is_lustre_s3_linked ? 0 : var.automatic_backup_retention_days
+  automatic_backup_retention_days = local.is_lustre_s3_linked ? 0 : local.backup_config.automatic_backup_retention_days
 
-  daily_automatic_backup_start_time = local.is_lustre_s3_linked ? null : var.daily_automatic_backup_start_time
+  daily_automatic_backup_start_time = local.is_lustre_s3_linked ? null : local.backup_config.daily_automatic_backup_start_time
 
   weekly_maintenance_start_time = var.weekly_maintenance_start_time
 
-  copy_tags_to_backups = var.copy_tags_to_backups
-  skip_final_backup    = var.skip_final_backup
-  final_backup_tags    = var.final_backup_tags
+  copy_tags_to_backups = local.backup_config.copy_tags_to_backups
+  skip_final_backup    = local.backup_config.skip_final_backup
+  final_backup_tags    = local.backup_config.final_backup_tags
 
   # ---------------------------------------------------------------------------
   # LUSTRE CONFIGURATION (ONLY for non-PERSISTENT_2)
   # ---------------------------------------------------------------------------
-  import_path = local.enable_lustre_config_at_create ? var.import_path : null
+  import_path = local.enable_lustre_config_at_create ? local.lustre_config.import_path : null
 
-  export_path = local.enable_lustre_config_at_create ? var.export_path : null
+  export_path = local.enable_lustre_config_at_create ? local.lustre_config.export_path : null
 
-  imported_file_chunk_size = local.enable_lustre_config_at_create ? var.imported_file_chunk_size : null
+  imported_file_chunk_size = local.enable_lustre_config_at_create ? local.lustre_config.imported_file_chunk_size : null
 
-  auto_import_policy = local.enable_lustre_config_at_create ? var.auto_import_policy : null
+  auto_import_policy = local.enable_lustre_config_at_create ? local.lustre_config.auto_import_policy : null
 
-  data_compression_type = var.data_compression_type
-  drive_cache_type      = var.drive_cache_type
+  data_compression_type = local.lustre_config.data_compression_type
+  drive_cache_type      = local.lustre_config.drive_cache_type
 
   # ---------------------------------------------------------------------------
   # LOG CONFIGURATION
   # ---------------------------------------------------------------------------
   dynamic "log_configuration" {
-    for_each = var.log_configuration != null ? [var.log_configuration] : []
+    for_each = local.lustre_config.log_configuration != null ? [local.lustre_config.log_configuration] : []
     content {
       destination = log_configuration.value.destination
       level       = log_configuration.value.level
@@ -154,7 +154,7 @@ resource "aws_fsx_lustre_file_system" "this" {
   # METADATA CONFIGURATION (PERSISTENT_2 ONLY)
   # ---------------------------------------------------------------------------
   dynamic "metadata_configuration" {
-    for_each = local.is_persistent_2 && var.metadata_configuration != null ? [var.metadata_configuration] : []
+    for_each = local.is_persistent_2 && local.lustre_config.metadata_configuration != null ? [local.lustre_config.metadata_configuration] : []
     content {
       mode = metadata_configuration.value.mode
       iops = lookup(metadata_configuration.value, "iops", null)
@@ -165,7 +165,7 @@ resource "aws_fsx_lustre_file_system" "this" {
   # ROOT SQUASH
   # ---------------------------------------------------------------------------
   dynamic "root_squash_configuration" {
-    for_each = var.root_squash_configuration != null ? [var.root_squash_configuration] : []
+    for_each = local.lustre_config.root_squash_configuration != null ? [local.lustre_config.root_squash_configuration] : []
     content {
       root_squash    = lookup(root_squash_configuration.value, "root_squash", null)
       no_squash_nids = lookup(root_squash_configuration.value, "no_squash_nids", null)
@@ -176,7 +176,7 @@ resource "aws_fsx_lustre_file_system" "this" {
   # DATA READ CACHE (INTELLIGENT_TIERING)
   # ---------------------------------------------------------------------------
   dynamic "data_read_cache_configuration" {
-    for_each = var.data_read_cache_configuration != null ? [var.data_read_cache_configuration] : []
+    for_each = local.lustre_config.data_read_cache_configuration != null ? [local.lustre_config.data_read_cache_configuration] : []
     content {
       sizing_mode = data_read_cache_configuration.value.sizing_mode
       size        = lookup(data_read_cache_configuration.value, "size", null)
@@ -196,7 +196,7 @@ resource "random_id" "fsx" {
 }
 
 resource "random_password" "fsx_admin" {
-  count            = var.create && var.fsx_type == "ontap" && var.fsx_admin_password == null ? 1 : 0
+  count            = var.create && var.fsx_type == "ontap" && local.ontap_config.fsx_admin_password == null ? 1 : 0
   length           = 32
   special          = true
   override_special = "!@#%^*()-_=+[]{}"
@@ -223,13 +223,12 @@ resource "aws_fsx_ontap_file_system" "this" {
   kms_key_id          = var.kms_key_id
   storage_type        = var.storage_type
 
-  # fsx_admin_password              = var.fsx_admin_password
-  fsx_admin_password              = coalesce(var.fsx_admin_password, try(random_password.fsx_admin[0].result, null))
-  ha_pairs                        = var.ha_pairs
-  throughput_capacity_per_ha_pair = var.throughput_capacity_per_ha_pair
+  fsx_admin_password              = coalesce(local.ontap_config.fsx_admin_password, try(random_password.fsx_admin[0].result, null))
+  ha_pairs                        = local.ontap_config.ha_pairs
+  throughput_capacity_per_ha_pair = local.ontap_config.throughput_capacity_per_ha_pair
 
-  automatic_backup_retention_days   = var.automatic_backup_retention_days
-  daily_automatic_backup_start_time = var.daily_automatic_backup_start_time
+  automatic_backup_retention_days   = local.backup_config.automatic_backup_retention_days
+  daily_automatic_backup_start_time = local.backup_config.daily_automatic_backup_start_time
   weekly_maintenance_start_time     = var.weekly_maintenance_start_time
   security_group_ids                = local.security_group_ids
 
@@ -306,12 +305,12 @@ resource "aws_fsx_openzfs_file_system" "this" {
   throughput_capacity  = var.throughput_capacity
   storage_type         = var.storage_type
   kms_key_id           = var.kms_key_id
-  copy_tags_to_backups = var.copy_tags_to_backups
-  skip_final_backup    = var.skip_final_backup
-  final_backup_tags    = var.final_backup_tags
+  copy_tags_to_backups = local.backup_config.copy_tags_to_backups
+  skip_final_backup    = local.backup_config.skip_final_backup
+  final_backup_tags    = local.backup_config.final_backup_tags
 
   dynamic "disk_iops_configuration" {
-    for_each = var.disk_iops_configuration != null ? [var.disk_iops_configuration] : []
+    for_each = local.openzfs_config.disk_iops_configuration != null ? [local.openzfs_config.disk_iops_configuration] : []
     content {
       mode = disk_iops_configuration.value.mode
       iops = try(disk_iops_configuration.value.iops, null)
@@ -356,7 +355,7 @@ resource "aws_fsx_openzfs_file_system" "this" {
   #   }
   # }
   dynamic "root_volume_configuration" {
-    for_each = var.root_volume_configuration != null ? [var.root_volume_configuration] : []
+    for_each = local.openzfs_config.root_volume_configuration != null ? [local.openzfs_config.root_volume_configuration] : []
     content {
       copy_tags_to_snapshots = try(root_volume_configuration.value.copy_tags_to_snapshots, null)
       data_compression_type  = try(root_volume_configuration.value.data_compression_type, null)
@@ -395,8 +394,8 @@ resource "aws_fsx_openzfs_file_system" "this" {
     }
   }
 
-  automatic_backup_retention_days   = var.automatic_backup_retention_days
-  daily_automatic_backup_start_time = var.daily_automatic_backup_start_time
+  automatic_backup_retention_days   = local.backup_config.automatic_backup_retention_days
+  daily_automatic_backup_start_time = local.backup_config.daily_automatic_backup_start_time
   weekly_maintenance_start_time     = var.weekly_maintenance_start_time
   security_group_ids                = local.security_group_ids
 
@@ -408,7 +407,7 @@ resource "aws_fsx_openzfs_file_system" "this" {
 ################################################################################
 
 resource "aws_fsx_data_repository_association" "this" {
-  for_each = var.create && var.fsx_type == "lustre" ? var.data_repository_associations : {}
+  for_each = var.create && var.fsx_type == "lustre" ? local.lustre_config.data_repository_associations : {}
 
   file_system_id                   = aws_fsx_lustre_file_system.this[0].id
   data_repository_path             = each.value.data_repository_path
@@ -442,7 +441,7 @@ resource "aws_fsx_data_repository_association" "this" {
 ################################################################################
 
 resource "aws_iam_role" "this" {
-  count = var.create && var.create_iam_role ? 1 : 0
+  count = var.create && local.iam_config.create_iam_role ? 1 : 0
 
   name_prefix        = "${local.name_prefix}-fsx-"
   assume_role_policy = data.aws_iam_policy_document.assume_role[0].json
@@ -450,7 +449,7 @@ resource "aws_iam_role" "this" {
 }
 
 data "aws_iam_policy_document" "assume_role" {
-  count = var.create && var.create_iam_role ? 1 : 0
+  count = var.create && local.iam_config.create_iam_role ? 1 : 0
 
   statement {
     effect = "Allow"
@@ -463,18 +462,18 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  for_each = var.create && var.create_iam_role ? toset(var.iam_policy_arns) : []
+  for_each = var.create && local.iam_config.create_iam_role ? toset(local.iam_config.iam_policy_arns) : []
 
   role       = aws_iam_role.this[0].name
   policy_arn = each.value
 }
 
 resource "aws_iam_role_policy" "custom" {
-  count = var.create && var.create_iam_role && var.custom_iam_policy != null ? 1 : 0
+  count = var.create && local.iam_config.create_iam_role && local.iam_config.custom_iam_policy != null ? 1 : 0
 
   name_prefix = "${local.name_prefix}-fsx-custom-"
   role        = aws_iam_role.this[0].id
-  policy      = var.custom_iam_policy
+  policy      = local.iam_config.custom_iam_policy
 }
 
 ################################################################################
@@ -482,17 +481,17 @@ resource "aws_iam_role_policy" "custom" {
 ################################################################################
 
 resource "aws_fsx_file_cache" "this" {
-  count = var.create && var.create_file_cache ? 1 : 0
+  count = var.create && local.file_cache_config.create_file_cache ? 1 : 0
 
-  file_cache_type                           = var.file_cache_type
-  file_cache_type_version                   = var.file_cache_type_version
-  storage_capacity                          = var.file_cache_storage_capacity
+  file_cache_type                           = local.file_cache_config.file_cache_type
+  file_cache_type_version                   = local.file_cache_config.file_cache_type_version
+  storage_capacity                          = local.file_cache_config.file_cache_storage_capacity
   subnet_ids                                = var.subnet_ids
   kms_key_id                                = var.kms_key_id
-  copy_tags_to_data_repository_associations = var.copy_tags_to_data_repository_associations
+  copy_tags_to_data_repository_associations = local.file_cache_config.copy_tags_to_data_repository_associations
 
   dynamic "lustre_configuration" {
-    for_each = var.file_cache_lustre_configuration != null ? [var.file_cache_lustre_configuration] : []
+    for_each = local.file_cache_config.lustre_configuration != null ? [local.file_cache_config.lustre_configuration] : []
     content {
       deployment_type               = lustre_configuration.value.deployment_type
       per_unit_storage_throughput   = lustre_configuration.value.per_unit_storage_throughput
@@ -516,7 +515,7 @@ resource "aws_fsx_file_cache" "this" {
 ################################################################################
 resource "random_password" "svm_admin" {
   for_each = {
-    for k, v in var.ontap_storage_virtual_machines :
+    for k, v in local.ontap_config.storage_virtual_machines :
     k => v
     if lookup(v, "svm_admin_password", null) == null
   }
@@ -535,13 +534,11 @@ resource "aws_ssm_parameter" "svm_admin" {
   tags = local.tags
 }
 
-
 resource "aws_fsx_ontap_storage_virtual_machine" "this" {
-  for_each = var.create && var.fsx_type == "ontap" ? var.ontap_storage_virtual_machines : {}
+  for_each = var.create && var.fsx_type == "ontap" ? local.ontap_config.storage_virtual_machines : {}
 
-  file_system_id = aws_fsx_ontap_file_system.this[0].id
-  name           = each.value.name
-  # svm_admin_password         = lookup(each.value, "svm_admin_password", null)
+  file_system_id             = aws_fsx_ontap_file_system.this[0].id
+  name                       = each.value.name
   svm_admin_password         = coalesce(lookup(each.value, "svm_admin_password", null), try(random_password.svm_admin[each.key].result, null))
   root_volume_security_style = lookup(each.value, "root_volume_security_style", "UNIX")
 
@@ -594,7 +591,7 @@ resource "aws_fsx_ontap_storage_virtual_machine" "this" {
 # }
 
 resource "aws_fsx_ontap_volume" "this" {
-  for_each = var.create && var.fsx_type == "ontap" ? var.ontap_volumes : {}
+  for_each = var.create && var.fsx_type == "ontap" ? local.ontap_config.volumes : {}
 
   # ---------------------------------------------------------------------------
   # Required
@@ -784,7 +781,7 @@ resource "aws_fsx_ontap_volume" "this" {
 # }
 
 resource "aws_fsx_openzfs_volume" "this" {
-  for_each = var.create && var.fsx_type == "openzfs" ? var.openzfs_volumes : {}
+  for_each = var.create && var.fsx_type == "openzfs" ? local.openzfs_config.volumes : {}
 
   name = each.value.name
   # parent_volume_id = try(each.value.parent_volume_id, aws_fsx_openzfs_file_system.this[0].root_volume_id)
@@ -851,7 +848,7 @@ resource "aws_fsx_openzfs_volume" "this" {
 ################################################################################
 
 resource "aws_fsx_openzfs_snapshot" "this" {
-  for_each = var.create && var.fsx_type == "openzfs" ? var.openzfs_snapshots : {}
+  for_each = var.create && var.fsx_type == "openzfs" ? local.openzfs_config.snapshots : {}
 
   name      = each.value.name
   volume_id = aws_fsx_openzfs_volume.this[each.value.volume_name].id

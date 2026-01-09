@@ -96,46 +96,6 @@ variable "kms_key_id" {
   default     = null
 }
 
-variable "copy_tags_to_backups" {
-  description = "Whether to copy tags to backups"
-  type        = bool
-  default     = true
-}
-
-variable "skip_final_backup" {
-  description = "Whether to skip final backup when deleting"
-  type        = bool
-  default     = false
-}
-
-variable "final_backup_tags" {
-  description = "Tags to apply to final backup"
-  type        = map(string)
-  default     = {}
-}
-
-variable "automatic_backup_retention_days" {
-  description = "Number of days to retain automatic backups"
-  type        = number
-  default     = 0
-
-  validation {
-    condition     = var.automatic_backup_retention_days >= 0 && var.automatic_backup_retention_days <= 90
-    error_message = "Automatic backup retention days must be between 0 and 90."
-  }
-}
-
-variable "daily_automatic_backup_start_time" {
-  description = "Daily automatic backup start time (HH:MM)"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.daily_automatic_backup_start_time == null || can(regex("^([01]?[0-9]|2[0-3]):[0-5][0-9]$", var.daily_automatic_backup_start_time))
-    error_message = "Daily automatic backup start time must be in HH:MM format."
-  }
-}
-
 variable "weekly_maintenance_start_time" {
   description = "Weekly maintenance start time (d:HH:MM)"
   type        = string
@@ -145,200 +105,6 @@ variable "weekly_maintenance_start_time" {
     condition     = var.weekly_maintenance_start_time == null || can(regex("^[1-7]:([01]?[0-9]|2[0-3]):[0-5][0-9]$", var.weekly_maintenance_start_time))
     error_message = "Weekly maintenance start time must be in d:HH:MM format where d is 1-7."
   }
-}
-
-################################################################################
-# Windows File Server Specific
-################################################################################
-
-variable "active_directory_id" {
-  description = "AWS Managed Microsoft AD ID"
-  type        = string
-  default     = null
-}
-
-variable "self_managed_active_directory" {
-  description = "Self-managed Active Directory configuration"
-  type = object({
-    dns_ips                                = list(string)
-    domain_name                            = string
-    password                               = string
-    username                               = string
-    file_system_administrators_group       = optional(string)
-    organizational_unit_distinguished_name = optional(string)
-  })
-  default = null
-}
-
-variable "audit_log_configuration" {
-  description = "Audit log configuration for Windows file systems"
-  type = object({
-    file_access_audit_log_level       = string
-    file_share_access_audit_log_level = string
-    audit_log_destination             = optional(string)
-  })
-  default = null
-}
-
-################################################################################
-# Lustre Specific
-################################################################################
-
-variable "per_unit_storage_throughput" {
-  description = "Per unit storage throughput for Lustre"
-  type        = number
-  default     = null
-}
-
-variable "import_path" {
-  description = "S3 bucket path for Lustre import"
-  type        = string
-  default     = null
-}
-
-variable "export_path" {
-  description = "S3 bucket path for Lustre export"
-  type        = string
-  default     = null
-}
-
-variable "imported_file_chunk_size" {
-  description = "Chunk size for imported files (MiB)"
-  type        = number
-  default     = null
-}
-
-variable "auto_import_policy" {
-  description = "Auto import policy for Lustre"
-  type        = string
-  default     = null
-}
-
-variable "data_compression_type" {
-  description = "Data compression type"
-  type        = string
-  default     = null
-}
-
-variable "drive_cache_type" {
-  description = "Drive cache type for Lustre"
-  type        = string
-  default     = null
-}
-
-variable "log_configuration" {
-  description = "Log configuration for Lustre"
-  type = object({
-    destination = string
-    level       = string
-  })
-  default = null
-}
-
-variable "metadata_configuration" {
-  type = object({
-    mode = string
-    iops = optional(number)
-  })
-  default = null
-}
-
-variable "root_squash_configuration" {
-  type = object({
-    root_squash    = optional(string)
-    no_squash_nids = optional(list(string))
-  })
-  default = null
-}
-
-variable "data_read_cache_configuration" {
-  type = object({
-    sizing_mode = string
-    size        = optional(number)
-  })
-  default = null
-}
-
-variable "efa_enabled" {
-  type    = bool
-  default = null
-}
-
-variable "data_repository_associations" {
-  description = "Data repository associations for Lustre"
-  type = map(object({
-    data_repository_path             = string
-    file_system_path                 = string
-    batch_import_meta_data_on_create = optional(bool)
-    imported_file_chunk_size         = optional(number)
-    s3 = optional(object({
-      auto_export_policy = object({
-        events = list(string)
-      })
-      auto_import_policy = object({
-        events = list(string)
-      })
-    }))
-  }))
-  default = {}
-}
-
-################################################################################
-# ONTAP Specific
-################################################################################
-
-variable "fsx_admin_password" {
-  description = "FSx admin password for ONTAP"
-  type        = string
-  default     = null
-  sensitive   = true
-}
-
-variable "ha_pairs" {
-  description = "Number of HA pairs for ONTAP"
-  type        = number
-  default     = null
-}
-
-variable "throughput_capacity_per_ha_pair" {
-  description = "Throughput capacity per HA pair for ONTAP"
-  type        = number
-  default     = null
-}
-
-################################################################################
-# OpenZFS Specific
-################################################################################
-
-variable "disk_iops_configuration" {
-  description = "Disk IOPS configuration for OpenZFS"
-  type = object({
-    mode = string
-    iops = optional(number)
-  })
-  default = null
-}
-
-variable "root_volume_configuration" {
-  description = "Root volume configuration for OpenZFS"
-  type = object({
-    copy_tags_to_snapshots = optional(bool)
-    data_compression_type  = optional(string)
-    read_only              = optional(bool)
-    record_size_kib        = optional(number)
-    nfs_exports = optional(list(object({
-      client_configurations = list(object({
-        clients = string
-        options = list(string)
-      }))
-    })))
-    user_and_group_quotas = optional(list(object({
-      id                         = number
-      storage_capacity_quota_gib = number
-      type                       = string
-    })))
-  })
-  default = null
 }
 
 ################################################################################
@@ -352,294 +118,293 @@ variable "security_group_ids" {
 }
 
 ################################################################################
-# IAM Configuration
+# Backup Configuration
 ################################################################################
 
-variable "create_iam_role" {
-  description = "Whether to create IAM role for FSx"
-  type        = bool
-  default     = false
-}
-
-variable "iam_policy_arns" {
-  description = "List of IAM policy ARNs to attach to the role"
-  type        = list(string)
-  default     = []
-}
-
-variable "custom_iam_policy" {
-  description = "Custom IAM policy JSON for FSx role"
-  type        = string
-  default     = null
-}
-
-################################################################################
-# File Cache Configuration
-################################################################################
-
-variable "create_file_cache" {
-  description = "Whether to create FSx File Cache"
-  type        = bool
-  default     = false
-}
-
-variable "file_cache_type" {
-  description = "Type of file cache (LUSTRE)"
-  type        = string
-  default     = "LUSTRE"
-}
-
-variable "file_cache_type_version" {
-  description = "Version of the file cache type"
-  type        = string
-  default     = "2.12"
-}
-
-variable "file_cache_storage_capacity" {
-  description = "Storage capacity of the file cache in GiB"
-  type        = number
-  default     = 1200
-}
-
-variable "copy_tags_to_data_repository_associations" {
-  description = "Whether to copy tags to data repository associations"
-  type        = bool
-  default     = true
-}
-
-variable "file_cache_lustre_configuration" {
-  description = "Lustre configuration for file cache"
+variable "backup_configuration" {
+  description = "Backup configuration for FSx file systems"
   type = object({
-    deployment_type               = string
-    per_unit_storage_throughput   = number
-    weekly_maintenance_start_time = optional(string)
-    metadata_configuration = optional(object({
-      storage_capacity = number
-    }))
+    copy_tags_to_backups              = optional(bool, true)
+    skip_final_backup                 = optional(bool, false)
+    final_backup_tags                 = optional(map(string), {})
+    automatic_backup_retention_days   = optional(number, 0)
+    daily_automatic_backup_start_time = optional(string, null)
   })
-  default = null
-}
-
-variable "file_cache_data_repository_associations" {
-  description = "Data repository associations for file cache"
-  type = map(object({
-    data_repository_path           = string
-    file_cache_path                = string
-    data_repository_subdirectories = optional(list(string))
-    nfs = optional(object({
-      version = string
-      dns_ips = optional(list(string))
-    }))
-  }))
   default = {}
+
+  validation {
+    condition = var.backup_configuration.automatic_backup_retention_days == null || (
+      var.backup_configuration.automatic_backup_retention_days >= 0 &&
+      var.backup_configuration.automatic_backup_retention_days <= 90
+    )
+    error_message = "Automatic backup retention days must be between 0 and 90."
+  }
+
+  validation {
+    condition = var.backup_configuration.daily_automatic_backup_start_time == null || can(
+      regex("^([01]?[0-9]|2[0-3]):[0-5][0-9]$", var.backup_configuration.daily_automatic_backup_start_time)
+    )
+    error_message = "Daily automatic backup start time must be in HH:MM format."
+  }
 }
 
 ################################################################################
-# ONTAP Storage Virtual Machines
+# Windows File Server Configuration
 ################################################################################
 
-variable "ontap_storage_virtual_machines" {
-  description = "ONTAP Storage Virtual Machines configuration"
-  type = map(object({
-    name                       = string
-    svm_admin_password         = optional(string)
-    root_volume_security_style = optional(string)
-    active_directory_configuration = optional(object({
-      netbios_name                           = string
+variable "windows_configuration" {
+  description = "Windows File Server specific configuration"
+  type = object({
+    active_directory_id = optional(string, null)
+    self_managed_active_directory = optional(object({
       dns_ips                                = list(string)
       domain_name                            = string
       password                               = string
       username                               = string
       file_system_administrators_group       = optional(string)
       organizational_unit_distinguished_name = optional(string)
-    }))
-  }))
+    }), null)
+    audit_log_configuration = optional(object({
+      file_access_audit_log_level       = string
+      file_share_access_audit_log_level = string
+      audit_log_destination             = optional(string)
+    }), null)
+  })
   default = {}
 }
 
 ################################################################################
-# ONTAP Volumes
+# Lustre Configuration
 ################################################################################
 
-# variable "ontap_volumes" {
-#   description = "ONTAP Volumes configuration"
-#   type = map(object({
-#     name                       = string
-#     svm_name                   = string
-#     size_in_megabytes          = number
-#     storage_efficiency_enabled = optional(bool)
-#     junction_path              = optional(string)
-#     security_style             = optional(string)
-#     volume_type                = optional(string)
-#     ontap_volume_type          = optional(string)
-#     copy_tags_to_backups       = optional(bool)
-#     skip_final_backup          = optional(bool)
-#     final_backup_tags          = optional(map(string))
-#     tiering_policy = optional(object({
-#       cooling_period = optional(number)
-#       name           = optional(string)
-#     }))
-#     snapshot_policy = optional(object({
-#       snapshot_policy_name = string
-#     }))
-#   }))
-#   default = {}
-# }
-
-variable "ontap_volumes" {
-  description = "ONTAP volumes configuration. Keys are logical volume identifiers."
-
-  type = map(object({
-
-    # Required
-    name     = string
-    svm_name = string
-
-    # Size (EXACTLY one of these should be set)
-    size_in_megabytes = optional(number)
-    size_in_bytes     = optional(number)
-
-    # General volume settings
-    junction_path     = optional(string)
-    security_style    = optional(string) # UNIX | NTFS | MIXED
-    volume_style      = optional(string) # FLEXVOL | FLEXGROUP
-    ontap_volume_type = optional(string) # RW | DP
-    snapshot_policy   = optional(string)
-
-    # Backup behavior
-    copy_tags_to_backups = optional(bool)
-    skip_final_backup    = optional(bool)
-    final_backup_tags    = optional(map(string))
-
-    # Storage efficiency (REQUIRED by AWS, default handled in module)    
-    storage_efficiency_enabled = optional(bool)
-
-    # Tiering policy
-    tiering_policy = optional(object({
-      name           = optional(string) # SNAPSHOT_ONLY | AUTO | ALL | NONE
-      cooling_period = optional(number) # 2–183 depending on policy
-    }))
-
-    # Aggregate configuration (FLEXGROUP only)    
-    aggregate_configuration = optional(object({
-      aggregates                 = optional(list(string)) # aggr1, aggr2...
-      constituents_per_aggregate = optional(number)
-    }))
-
-    # SnapLock configuration    
-    snaplock_configuration = optional(object({
-      snaplock_type              = string # COMPLIANCE | ENTERPRISE
-      audit_log_volume           = optional(bool)
-      privileged_delete          = optional(string) # DISABLED | ENABLED | PERMANENTLY_DISABLED
-      volume_append_mode_enabled = optional(bool)
-      autocommit_period = optional(object({
-        type  = string # MINUTES | HOURS | DAYS | MONTHS | YEARS | NONE
-        value = optional(number)
-      }))
-      retention_period = optional(object({
-        default_retention = object({
-          type  = string # SECONDS | MINUTES | HOURS | DAYS | MONTHS | YEARS | INFINITE | UNSPECIFIED
-          value = optional(number)
+variable "lustre_configuration" {
+  description = "Lustre file system specific configuration"
+  type = object({
+    per_unit_storage_throughput = optional(number, null)
+    import_path                 = optional(string, null)
+    export_path                 = optional(string, null)
+    imported_file_chunk_size    = optional(number, null)
+    auto_import_policy          = optional(string, null)
+    data_compression_type       = optional(string, null)
+    drive_cache_type            = optional(string, null)
+    efa_enabled                 = optional(bool, null)
+    log_configuration = optional(object({
+      destination = string
+      level       = string
+    }), null)
+    metadata_configuration = optional(object({
+      mode = string
+      iops = optional(number)
+    }), null)
+    root_squash_configuration = optional(object({
+      root_squash    = optional(string)
+      no_squash_nids = optional(list(string))
+    }), null)
+    data_read_cache_configuration = optional(object({
+      sizing_mode = string
+      size        = optional(number)
+    }), null)
+    data_repository_associations = optional(map(object({
+      data_repository_path             = string
+      file_system_path                 = string
+      batch_import_meta_data_on_create = optional(bool)
+      imported_file_chunk_size         = optional(number)
+      s3 = optional(object({
+        auto_export_policy = object({
+          events = list(string)
         })
-        maximum_retention = object({
+        auto_import_policy = object({
+          events = list(string)
+        })
+      }))
+    })), {})
+  })
+  default = {}
+}
+
+################################################################################
+# ONTAP Configuration
+################################################################################
+
+variable "ontap_configuration" {
+  description = "ONTAP file system specific configuration"
+  type = object({
+    fsx_admin_password              = optional(string, null)
+    ha_pairs                        = optional(number, null)
+    throughput_capacity_per_ha_pair = optional(number, null)
+    storage_virtual_machines = optional(map(object({
+      name                       = string
+      svm_admin_password         = optional(string)
+      root_volume_security_style = optional(string)
+      active_directory_configuration = optional(object({
+        netbios_name                           = string
+        dns_ips                                = list(string)
+        domain_name                            = string
+        password                               = string
+        username                               = string
+        file_system_administrators_group       = optional(string)
+        organizational_unit_distinguished_name = optional(string)
+      }))
+    })), {})
+    volumes = optional(map(object({
+      name                       = string
+      svm_name                   = string
+      size_in_megabytes          = optional(number)
+      size_in_bytes              = optional(number)
+      junction_path              = optional(string)
+      security_style             = optional(string)
+      volume_style               = optional(string)
+      ontap_volume_type          = optional(string)
+      snapshot_policy            = optional(string)
+      copy_tags_to_backups       = optional(bool)
+      skip_final_backup          = optional(bool)
+      final_backup_tags          = optional(map(string))
+      storage_efficiency_enabled = optional(bool)
+      tiering_policy = optional(object({
+        name           = optional(string)
+        cooling_period = optional(number)
+      }))
+      aggregate_configuration = optional(object({
+        aggregates                 = optional(list(string))
+        constituents_per_aggregate = optional(number)
+      }))
+      snaplock_configuration = optional(object({
+        snaplock_type              = string
+        audit_log_volume           = optional(bool)
+        privileged_delete          = optional(string)
+        volume_append_mode_enabled = optional(bool)
+        autocommit_period = optional(object({
           type  = string
           value = optional(number)
-        })
-        minimum_retention = object({
-          type  = string
-          value = optional(number)
-        })
+        }))
+        retention_period = optional(object({
+          default_retention = object({
+            type  = string
+            value = optional(number)
+          })
+          maximum_retention = object({
+            type  = string
+            value = optional(number)
+          })
+          minimum_retention = object({
+            type  = string
+            value = optional(number)
+          })
+        }))
       }))
-    }))
-
-    # Advanced / less common    
-    bypass_snaplock_enterprise_retention = optional(bool)
-  }))
-
+      bypass_snaplock_enterprise_retention = optional(bool)
+    })), {})
+  })
   default = {}
 }
 
-
 ################################################################################
-# OpenZFS Volumes
+# OpenZFS Configuration
 ################################################################################
 
-# variable "openzfs_volumes" {
-#   description = "OpenZFS Volumes configuration"
-#   type = map(object({
-#     name                             = string
-#     parent_volume_id                 = optional(string)
-#     storage_capacity_quota_gib       = optional(number)
-#     storage_capacity_reservation_gib = optional(number)
-#     copy_tags_to_snapshots           = optional(bool)
-#     data_compression_type            = optional(string)
-#     read_only                        = optional(bool)
-#     record_size_kib                  = optional(number)
-#     nfs_exports = optional(list(object({
-#       client_configurations = list(object({
-#         clients = string
-#         options = list(string)
-#       }))
-#     })))
-#     user_and_group_quotas = optional(list(object({
-#       id                         = number
-#       storage_capacity_quota_gib = number
-#       type                       = string
-#     })))
-#   }))
-#   default = {}
-# }
-
-variable "openzfs_volumes" {
-  description = "OpenZFS Volumes configuration"
-  type = map(object({
-    name             = string
-    parent_volume_id = optional(string)
-
-    copy_tags_to_snapshots = optional(bool)
-    data_compression_type  = optional(string)
-    read_only              = optional(bool)
-    record_size_kib        = optional(number)
-
-    storage_capacity_quota_gib       = optional(number)
-    storage_capacity_reservation_gib = optional(number)
-
-    delete_volume_options = optional(list(string))
-
-    origin_snapshot = optional(object({
-      copy_strategy = string
-      snapshot_arn  = string
-    }))
-
-    nfs_exports = optional(list(object({
-      client_configurations = list(object({
-        clients = string
-        options = list(string)
+variable "openzfs_configuration" {
+  description = "OpenZFS file system specific configuration"
+  type = object({
+    disk_iops_configuration = optional(object({
+      mode = string
+      iops = optional(number)
+    }), null)
+    root_volume_configuration = optional(object({
+      copy_tags_to_snapshots = optional(bool)
+      data_compression_type  = optional(string)
+      read_only              = optional(bool)
+      record_size_kib        = optional(number)
+      nfs_exports = optional(list(object({
+        client_configurations = list(object({
+          clients = string
+          options = list(string)
+        }))
+      })))
+      user_and_group_quotas = optional(list(object({
+        id                         = number
+        storage_capacity_quota_gib = number
+        type                       = string
+      })))
+    }), null)
+    volumes = optional(map(object({
+      name                             = string
+      parent_volume_id                 = optional(string)
+      copy_tags_to_snapshots           = optional(bool)
+      data_compression_type            = optional(string)
+      read_only                        = optional(bool)
+      record_size_kib                  = optional(number)
+      storage_capacity_quota_gib       = optional(number)
+      storage_capacity_reservation_gib = optional(number)
+      delete_volume_options            = optional(list(string))
+      origin_snapshot = optional(object({
+        copy_strategy = string
+        snapshot_arn  = string
       }))
-    })))
-
-    user_and_group_quotas = optional(list(object({
-      id                         = number
-      storage_capacity_quota_gib = number
-      type                       = string
-    })))
-
-    tags = optional(map(string))
-  }))
+      nfs_exports = optional(list(object({
+        client_configurations = list(object({
+          clients = string
+          options = list(string)
+        }))
+      })))
+      user_and_group_quotas = optional(list(object({
+        id                         = number
+        storage_capacity_quota_gib = number
+        type                       = string
+      })))
+      tags = optional(map(string))
+    })), {})
+    snapshots = optional(map(object({
+      name        = string
+      volume_name = string
+    })), {})
+  })
   default = {}
 }
 
+################################################################################
+# IAM Configuration
+################################################################################
+
+variable "iam_configuration" {
+  description = "IAM configuration for FSx"
+  type = object({
+    create_iam_role   = optional(bool, false)
+    iam_policy_arns   = optional(list(string), [])
+    custom_iam_policy = optional(string, null)
+  })
+  default = {}
+}
 
 ################################################################################
-# OpenZFS Snapshots
+# File Cache Configuration
 ################################################################################
 
-variable "openzfs_snapshots" {
-  description = "OpenZFS Snapshots configuration"
-  type = map(object({
-    name        = string
-    volume_name = string
-  }))
+variable "file_cache_configuration" {
+  description = "FSx File Cache configuration"
+  type = object({
+    create_file_cache                         = optional(bool, false)
+    file_cache_type                           = optional(string, "LUSTRE")
+    file_cache_type_version                   = optional(string, "2.12")
+    file_cache_storage_capacity               = optional(number, 1200)
+    copy_tags_to_data_repository_associations = optional(bool, true)
+    lustre_configuration = optional(object({
+      deployment_type               = string
+      per_unit_storage_throughput   = number
+      weekly_maintenance_start_time = optional(string)
+      metadata_configuration = optional(object({
+        storage_capacity = number
+      }))
+    }), null)
+    data_repository_associations = optional(map(object({
+      data_repository_path           = string
+      file_cache_path                = string
+      data_repository_subdirectories = optional(list(string))
+      nfs = optional(object({
+        version = string
+        dns_ips = optional(list(string))
+      }))
+    })), {})
+  })
   default = {}
 }
 

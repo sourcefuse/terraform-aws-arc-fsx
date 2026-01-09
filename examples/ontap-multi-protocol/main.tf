@@ -26,10 +26,10 @@ module "tags" {
   project     = var.namespace
 
   extra_tags = {
-    RepoName     = "terraform-aws-arc-fsx"
-    Project      = "Multi-Protocol Storage"
-    StorageType  = "ONTAP"
-    Protocols    = "NFS-SMB-iSCSI"
+    RepoName    = "terraform-aws-arc-fsx"
+    Project     = "Multi-Protocol Storage"
+    StorageType = "ONTAP"
+    Protocols   = "NFS-SMB-iSCSI"
   }
 }
 
@@ -95,25 +95,24 @@ module "fsx_ontap" {
   security_group_ids  = [module.security_group.id]
 
   # FSx Configuration
-  storage_capacity                = 1024
-  deployment_type                = "MULTI_AZ_1"
-  throughput_capacity_per_ha_pair = 512
-  ha_pairs                       = 1
-  storage_type                   = "SSD"
+  storage_capacity = 1024
+  deployment_type  = "MULTI_AZ_1"
+  storage_type     = "SSD"
 
   # ONTAP Configuration
-  # FSx Admin Password
-  # NOTE:
-  # - If fsx_admin_password is NOT provided, the module will:
-  #   - Automatically generate a strong random password
-  #   - Store it securely in AWS SSM Parameter Store as a SecureString
-  # - If you want to manage the password externally, you may explicitly pass it.
-  # fsx_admin_password = var.fsx_admin_password
+  ontap_configuration = {
+    throughput_capacity_per_ha_pair = 512
+    ha_pairs                        = 1
+  }
 
   # Backup Configuration
-  automatic_backup_retention_days   = 14
-  daily_automatic_backup_start_time = "01:00"
-  weekly_maintenance_start_time     = "6:02:00"
+  backup_configuration = {
+    automatic_backup_retention_days   = 14
+    daily_automatic_backup_start_time = "01:00"
+    skip_final_backup                 = true
+  }
+
+  weekly_maintenance_start_time = "6:02:00"
 
   tags = module.tags.tags
 }

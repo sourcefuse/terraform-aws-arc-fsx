@@ -6,7 +6,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.0"
+      version = ">= 5.0, < 7.0"
     }
   }
 }
@@ -27,15 +27,15 @@ module "tags" {
 
   extra_tags = {
     RepoName = "terraform-aws-arc-fsx"
-    Name        = "${var.namespace}-${var.environment}-fsx-windows-sg"
-    FSxType     = "windows"
+    Name     = "${var.namespace}-${var.environment}-fsx-windows-sg"
+    FSxType  = "windows"
   }
 }
 
 module "security_group" {
   source = "sourcefuse/arc-security-group/aws"
 
-  name = "${var.namespace}-${var.environment}-fsx-windows-sg"
+  name   = "${var.namespace}-${var.environment}-fsx-windows-sg"
   vpc_id = data.aws_vpc.this.id
 
   ingress_rules = [
@@ -97,13 +97,18 @@ module "fsx_windows" {
   deployment_type     = "SINGLE_AZ_2"
   storage_type        = "SSD"
 
-  # Active Directory
-  active_directory_id = var.active_directory_id
+  # Windows Configuration
+  windows_configuration = {
+    active_directory_id = var.active_directory_id
+  }
 
   # Backup Configuration
-  automatic_backup_retention_days   = 7
-  daily_automatic_backup_start_time = "03:00"
-  weekly_maintenance_start_time     = "1:04:00"
+  backup_configuration = {
+    automatic_backup_retention_days   = 7
+    daily_automatic_backup_start_time = "03:00"
+  }
+
+  weekly_maintenance_start_time = "1:04:00"
 
   tags = module.tags.tags
 }

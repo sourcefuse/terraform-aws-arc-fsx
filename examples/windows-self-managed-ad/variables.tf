@@ -30,16 +30,16 @@ variable "ad_domain_name" {
   type        = string
 }
 
-variable "ad_password" {
-  description = "Password for AD service account"
-  type        = string
-  sensitive   = true
-}
+# variable "ad_password" {
+#   description = "Password for AD service account"
+#   type        = string
+#   sensitive   = true
+# }
 
-variable "ad_username" {
-  description = "Username for AD service account"
-  type        = string
-}
+# variable "ad_username" {
+#   description = "Username for AD service account"
+#   type        = string
+# }
 
 variable "ad_admin_group" {
   description = "AD group for file system administrators"
@@ -57,4 +57,9 @@ variable "allowed_cidr_blocks" {
   description = "CIDR blocks allowed to access FSx"
   type        = list(string)
   default     = ["10.0.0.0/8"]
+}
+
+variable "ad_secret_name" {
+  description = "Name of the Secrets Manager secret containing AD credentials"
+  type        = string
 }

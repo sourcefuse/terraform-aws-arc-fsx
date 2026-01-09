@@ -9,7 +9,7 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 5.0, < 7.0"
     }
-        random = {
+    random = {
       source  = "hashicorp/random"
       version = "~> 3.0"
     }
@@ -31,14 +31,14 @@ module "tags" {
   project     = var.namespace
 
   extra_tags = {
-    RepoName = "terraform-aws-arc-fsx"
-    Project     = "HPC Workload"
-    DataSource  = "S3"
+    RepoName   = "terraform-aws-arc-fsx"
+    Project    = "HPC Workload"
+    DataSource = "S3"
   }
 }
 
 module "security_group" {
-  source = "sourcefuse/arc-security-group/aws"
+  source  = "sourcefuse/arc-security-group/aws"
   version = "0.0.3"
 
   name   = "${var.namespace}-${var.environment}-fsx-lustre-sg"
@@ -74,7 +74,7 @@ module "security_group" {
 # Simple S3 bucket without the problematic module
 resource "aws_s3_bucket" "this" {
   bucket = "example-fsx-lustre-bucket-${random_id.bucket_suffix.hex}"
-  
+
   tags = module.tags.tags
 }
 
@@ -112,38 +112,37 @@ module "fsx_lustre" {
   security_group_ids = [module.security_group.id]
 
   # FSx Configuration
-  storage_capacity            = 1200 #GiB
-  deployment_type            = "PERSISTENT_2"
-  per_unit_storage_throughput = 250
-  storage_type               = "SSD"
+  storage_capacity = 1200 #GiB
+  deployment_type  = "PERSISTENT_2"
+  storage_type     = "SSD"
 
-  # S3 Integration
-  # import_path              = "s3://${aws_s3_bucket.this.id}/import"
-  # export_path              = "s3://${aws_s3_bucket.this.id}/export"
-  # imported_file_chunk_size = 1024
-  # auto_import_policy       = "NEW_CHANGED"
-  data_compression_type    = "LZ4"
-
-  # Data Repository Associations
-  data_repository_associations = {
-    main = {
-      data_repository_path = "s3://${aws_s3_bucket.this.id}/import"
-      file_system_path     = "/data"
-      s3 = {
-        auto_export_policy = {
-          events = ["NEW", "CHANGED", "DELETED"]
-        }
-        auto_import_policy = {
-          events = ["NEW", "CHANGED", "DELETED"]
+  # Lustre Configuration
+  lustre_configuration = {
+    per_unit_storage_throughput = 250
+    data_compression_type       = "LZ4"
+    data_repository_associations = {
+      main = {
+        data_repository_path = "s3://${aws_s3_bucket.this.id}/import"
+        file_system_path     = "/data"
+        s3 = {
+          auto_export_policy = {
+            events = ["NEW", "CHANGED", "DELETED"]
+          }
+          auto_import_policy = {
+            events = ["NEW", "CHANGED", "DELETED"]
+          }
         }
       }
     }
   }
 
   # Backup Configuration
-  automatic_backup_retention_days   = 30
-  daily_automatic_backup_start_time = "02:00"
-  weekly_maintenance_start_time     = "7:03:00"
+  backup_configuration = {
+    automatic_backup_retention_days   = 30
+    daily_automatic_backup_start_time = "02:00"
+  }
+
+  weekly_maintenance_start_time = "7:03:00"
 
   tags = module.tags.tags
 }

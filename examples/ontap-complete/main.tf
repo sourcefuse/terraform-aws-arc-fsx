@@ -89,43 +89,43 @@ module "fsx_ontap_complete" {
   # FSx Configuration
   storage_capacity = 1024
   deployment_type  = "MULTI_AZ_1"
-  throughput_capacity_per_ha_pair = 512
-  ha_pairs                        = 1
-  storage_type                    = "SSD"
+  storage_type     = "SSD"
 
-  # ONTAP Storage Virtual Machines
-  ontap_storage_virtual_machines = {
-    svm1 = {
-      name = "svm-production"
-      root_volume_security_style = "UNIX"
-    }
-    svm2 = {
-      name                       = "svm-development"
-      root_volume_security_style = "NTFS"
-    }
-  }
-
-  # ONTAP Volumes
-  ontap_volumes = {
-    prod_data = {
-      name                       = "production_data"
-      svm_name                   = "svm1"
-      size_in_megabytes          = 102400 # 100GB
-      storage_efficiency_enabled = true
-      junction_path              = "/prod_data"
-      security_style             = "UNIX"
-      tiering_policy = {
-        name           = "AUTO"
-        cooling_period = 31
+  # ONTAP Configuration
+  ontap_configuration = {
+    throughput_capacity_per_ha_pair = 512
+    ha_pairs                        = 1
+    storage_virtual_machines = {
+      svm1 = {
+        name                       = "svm-production"
+        root_volume_security_style = "UNIX"
+      }
+      svm2 = {
+        name                       = "svm-development"
+        root_volume_security_style = "NTFS"
       }
     }
-    dev_data = {
-      name                       = "development_data"
-      svm_name                   = "svm2"
-      size_in_megabytes          = 51200
-      storage_efficiency_enabled = true # 👈 REQUIRED
-      junction_path              = "/dev_data"
-      security_style             = "NTFS"
+    volumes = {
+      prod_data = {
+        name                       = "production_data"
+        svm_name                   = "svm1"
+        size_in_megabytes          = 102400 # 100GB
+        storage_efficiency_enabled = true
+        junction_path              = "/prod_data"
+        security_style             = "UNIX"
+        tiering_policy = {
+          name           = "AUTO"
+          cooling_period = 31
+        }
+      }
+      dev_data = {
+        name                       = "development_data"
+        svm_name                   = "svm2"
+        size_in_megabytes          = 51200
+        storage_efficiency_enabled = true
+        junction_path              = "/dev_data"
+        security_style             = "NTFS"
+      }
     }
   }
 

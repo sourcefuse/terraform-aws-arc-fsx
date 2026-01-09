@@ -91,25 +91,31 @@ module "fsx_windows_self_managed" {
   deployment_type     = "SINGLE_AZ_2"
   storage_type        = "SSD"
 
-  # Self-Managed Active Directory
-  self_managed_active_directory = {
-    dns_ips     = var.ad_dns_ips
-    domain_name = var.ad_domain_name
-    password    = var.ad_password
-    username    = var.ad_username
-    file_system_administrators_group      = var.ad_admin_group
-    organizational_unit_distinguished_name = var.ad_ou_dn
+  # Windows Configuration
+  windows_configuration = {
+    self_managed_active_directory = {
+      dns_ips     = var.ad_dns_ips
+      domain_name = var.ad_domain_name
+      # password                               = var.ad_password
+      # username                               = var.ad_username
+      username                               = local.ad_credentials.username
+      password                               = local.ad_credentials.password
+      file_system_administrators_group       = var.ad_admin_group
+      organizational_unit_distinguished_name = var.ad_ou_dn
+    }
+    audit_log_configuration = {
+      file_access_audit_log_level       = "SUCCESS_AND_FAILURE"
+      file_share_access_audit_log_level = "SUCCESS_AND_FAILURE"
+    }
   }
 
   # Backup Configuration
-  automatic_backup_retention_days   = 14
-  daily_automatic_backup_start_time = "02:00"
-  weekly_maintenance_start_time     = "1:03:00"
+  # backup_configuration = {
+  #   automatic_backup_retention_days   = 7
+  #   daily_automatic_backup_start_time = "02:00"
+  # }
 
-  audit_log_configuration = {
-  file_access_audit_log_level       = "SUCCESS_AND_FAILURE"
-  file_share_access_audit_log_level = "SUCCESS_AND_FAILURE"
-}
+  weekly_maintenance_start_time = "1:03:00"
 
   tags = module.tags.tags
 }
