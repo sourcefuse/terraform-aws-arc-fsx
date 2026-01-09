@@ -159,7 +159,7 @@ module "fsx_openzfs" {
 
 - [Basic Windows File Server](./examples/basic-windows/) - Single-AZ Windows file server with AWS Managed AD
 - [Windows with Self-Managed AD](./examples/windows-self-managed-ad/) - Windows file server with custom Active Directory
-- [Lustre](./examples/lustre/) - High-performance Lustre file system with S3 integration
+- [Lustre](./examples/lustre/) - High-performance Lustre file system
 - [ONTAP Complete](./examples/ontap-complete/) - NetApp ONTAP with storage virtual machines and volumes
 - [ONTAP Multi-Protocol](./examples/ontap-multi-protocol/) - NetApp ONTAP with NFS, SMB, and iSCSI support
 - [OpenZFS Complete](./examples/openzfs-complete/) - OpenZFS with snapshots and compression
