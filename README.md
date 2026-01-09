@@ -1,106 +1,183 @@
-![Module Structure](./static/banner.png)
-# AWS Terraform Module
-# [terraform-aws-arc-sfx](https://github.com/sourcefuse/terraform-aws-arc-sfx)
+# AWS FSx Terraform Module
 
-<a href="https://github.com/sourcefuse/terraform-aws-arc-sfx/releases/latest"><img src="https://img.shields.io/github/release/sourcefuse/terraform-aws-arc-sfx.svg?style=for-the-badge" alt="Latest Release"/></a> <a href="https://github.com/sourcefuse/terraform-aws-arc-sfx/commits"><img src="https://img.shields.io/github/last-commit/sourcefuse/terraform-aws-arc-sfx.svg?style=for-the-badge" alt="Last Updated"/></a> ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
+A production-grade, reusable Terraform module for provisioning AWS FSx file systems with support for all FSx variants and associated resources.
 
-[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-sfx&token=13a2f3a3c3de5bc9caf8060148954bd0979ceab4)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-sfx)
+## Features
 
----
+- **Multi-FSx Support**: Windows File Server, Lustre, NetApp ONTAP, and OpenZFS
+- **File Cache**: FSx File Cache for high-performance caching
+- **Volumes**: ONTAP and OpenZFS volume management
+- **Storage Virtual Machines**: ONTAP SVM creation and configuration
+- **Snapshots**: OpenZFS snapshot management
+- **Backups**: Manual backup creation and management
+- **Security**: SourceFuse ARC Security Group module with protocol-specific rules
+- **Active Directory**: Support for both AWS Managed AD and self-managed AD
+- **S3 Integration**: Data repository associations for Lustre file systems
+- **Backup Management**: Configurable automatic backups and retention
+- **Encryption**: KMS encryption support for data at rest
+- **IAM Integration**: Optional IAM role creation with least-privilege policies
+- **Flexible Networking**: Multi-AZ and single-AZ deployment options
 
-# terraform-aws-module-template
+## FSx Component Support Matrix
 
-## Overview
-
-SourceFuse AWS Reference Architecture (ARC) Terraform module for managing _________.
+| Component | Windows | Lustre | ONTAP | OpenZFS | File Cache |
+|-----------|---------|--------|-------|---------|------------|
+| File Systems | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Volumes | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Storage Virtual Machines | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Snapshots | ❌ | ❌ | ❌ | ✅ | ❌ |
+| Backups | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Data Repository | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Multi-AZ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| S3 Integration | ❌ | ✅ | ❌ | ❌ | ❌ |
 
 ## Usage
 
-To see a full example, check out the [main.tf](./example/main.tf) file in the example folder.  
+### Basic Windows File Server
 
 ```hcl
-module "this" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-<module_name>"
+module "fsx_windows" {
+  source = "path/to/fsx-module"
+
+  name        = "my-windows-fsx"
+  environment = "prod"
+  fsx_type    = "windows"
+
+  vpc_id     = "vpc-12345678"
+  subnet_ids = ["subnet-12345678"]
+
+  storage_capacity    = 32
+  throughput_capacity = 8
+  deployment_type     = "SINGLE_AZ_2"
+
+  active_directory_id = "d-1234567890"
+  
+  tags = {
+    Project = "File Sharing"
+  }
 }
 ```
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+### Lustre with S3 Integration
+
+```hcl
+module "fsx_lustre" {
+  source = "path/to/fsx-module"
+
+  name        = "my-lustre-fsx"
+  environment = "prod"
+  fsx_type    = "lustre"
+
+  vpc_id     = "vpc-12345678"
+  subnet_ids = ["subnet-12345678"]
+
+  storage_capacity            = 1200
+  deployment_type            = "PERSISTENT_2"
+  per_unit_storage_throughput = 250
+
+  import_path = "s3://my-bucket/data/"
+  export_path = "s3://my-bucket/results/"
+
+  data_repository_associations = {
+    main = {
+      data_repository_path = "s3://my-bucket/data/"
+      file_system_path     = "/data"
+    }
+  }
+}
+```
+
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3, < 2.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.0 |
+| terraform | >= 1.3 |
+| aws | >= 5.0 |
 
 ## Providers
 
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
+| Name | Version |
+|------|---------|
+| aws | >= 5.0 |
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| create | Whether to create FSx resources | `bool` | `true` | no |
+| name | Name prefix for FSx resources | `string` | `""` | no |
+| environment | Environment name (e.g., dev, staging, prod) | `string` | `"dev"` | no |
+| fsx_type | Type of FSx file system to create | `string` | `"windows"` | no |
+| storage_capacity | Storage capacity of the file system in GiB | `number` | n/a | yes |
+| subnet_ids | List of subnet IDs for the file system | `list(string)` | n/a | yes |
+| vpc_id | VPC ID where the file system will be created | `string` | n/a | yes |
+| throughput_capacity | Throughput capacity in MB/s | `number` | `null` | no |
+| deployment_type | Deployment type for the file system | `string` | `null` | no |
+| storage_type | Storage type (SSD or HDD) | `string` | `"SSD"` | no |
+| kms_key_id | KMS key ID for encryption | `string` | `null` | no |
+| active_directory_id | AWS Managed Microsoft AD ID | `string` | `null` | no |
+| create_security_group | Whether to create a security group for FSx | `bool` | `true` | no |
+| allowed_cidr_blocks | CIDR blocks allowed to access FSx | `list(string)` | `["10.0.0.0/8"]` | no |
+| tags | Additional tags to apply to all resources | `map(string)` | `{}` | no |
 
 ## Outputs
 
-No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+| Name | Description |
+|------|-------------|
+| fsx_id | ID of the FSx file system |
+| fsx_arn | ARN of the FSx file system |
+| fsx_dns_name | DNS name of the FSx file system |
+| fsx_network_interface_ids | Network interface IDs of the FSx file system |
+| security_group_id | ID of the created security group |
+| iam_role_arn | ARN of the created IAM role |
 
-## Versioning  
-This project uses a `.version` file at the root of the repo which the pipeline reads from and does a git tag.  
+## Examples
 
-When you intend to commit to `main`, you will need to increment this version. Once the project is merged,
-the pipeline will kick off and tag the latest git commit.  
+- [Basic Windows File Server](./examples/basic-windows/) - Single-AZ Windows file server with AWS Managed AD
+- [Windows with Self-Managed AD](./examples/windows-self-managed-ad/) - Windows file server with custom Active Directory
+- [Lustre with S3 Integration](./examples/lustre-s3-integration/) - High-performance Lustre with S3 data repository
+- [ONTAP Multi-Protocol](./examples/ontap-multi-protocol/) - NetApp ONTAP with NFS, SMB, and iSCSI support
+- [Custom Security and KMS](./examples/custom-security-kms/) - Advanced security configuration with custom KMS keys
 
-## Development
+## Architecture
 
-### Prerequisites
-
-- [terraform](https://learn.hashicorp.com/terraform/getting-started/install#installing-terraform)
-- [terraform-docs](https://github.com/segmentio/terraform-docs)
-- [pre-commit](https://pre-commit.com/#install)
-- [golang](https://golang.org/doc/install#install)
-- [golint](https://github.com/golang/lint#installation)
-
-### Configurations
-
-- Configure pre-commit hooks
-  ```sh
-  pre-commit install
-  ```
-
-### Versioning
-
-while Contributing or doing git commit please specify the breaking change in your commit message whether its major,minor or patch
-
-For Example
-
-```sh
-git commit -m "your commit message #major"
 ```
-By specifying this , it will bump the version and if you don't specify this in your commit message then by default it will consider patch and will bump that accordingly
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   VPC Subnets   │    │  Security Group │    │   FSx System    │
+│                 │────│                 │────│                 │
+│ Multi-AZ Support│    │ Protocol Rules  │    │ Windows/Lustre/ │
+└─────────────────┘    └─────────────────┘    │ ONTAP/OpenZFS   │
+                                              └─────────────────┘
+                              │
+                    ┌─────────────────┐
+                    │  Optional IAM   │
+                    │      Role       │
+                    └─────────────────┘
+```
 
-### Tests
-- Tests are available in `test` directory
-- Configure the dependencies
-  ```sh
-  cd test/
-  go mod init github.com/sourcefuse/terraform-aws-refarch-<module_name>
-  go get github.com/gruntwork-io/terratest/modules/terraform
-  ```
-- Now execute the test  
-  ```sh
-  go test -timeout  30m
-  ```
+## Security Considerations
 
-## Authors
+- Security groups are created with minimal required ports for each FSx type
+- KMS encryption is supported for data at rest
+- IAM roles follow least-privilege principles
+- Network access is restricted to specified CIDR blocks
+- Backup encryption is enabled by default
 
-This project is authored by:
-- SourceFuse ARC Team
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## License
+
+This module is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Support
+
+For issues and questions:
+- Create an issue in this repository
+- Check the [examples](./examples/) directory for common use cases
+- Review AWS FSx documentation for service-specific requirements
