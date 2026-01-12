@@ -7,7 +7,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.0, < 7.0"
+      version = ">= 6.5.0, < 7.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -25,7 +25,7 @@ provider "aws" {
 ################################################################################
 module "tags" {
   source  = "sourcefuse/arc-tags/aws"
-  version = "1.2.3"
+  version = "1.2.7"
 
   environment = var.environment
   project     = var.namespace
@@ -39,7 +39,7 @@ module "tags" {
 
 module "security_group" {
   source  = "sourcefuse/arc-security-group/aws"
-  version = "0.0.3"
+  version = "0.0.4"
 
   name   = "${var.namespace}-${var.environment}-fsx-lustre-sg"
   vpc_id = data.aws_vpc.this.id
@@ -72,33 +72,21 @@ module "security_group" {
 }
 
 # Simple S3 bucket without the problematic module
-resource "aws_s3_bucket" "this" {
-  bucket = "example-fsx-lustre-bucket-${random_id.bucket_suffix.hex}"
-
-  tags = module.tags.tags
-}
-
-resource "aws_s3_bucket_versioning" "this" {
-  bucket = aws_s3_bucket.this.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
-  bucket = aws_s3_bucket.this.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
 resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
+module "s3" {
+  source        = "sourcefuse/arc-s3/aws"
+  version       = "0.0.7"
+  name          = "${var.namespace}-${var.environment}-lustre-s3-logs-${random_id.bucket_suffix.hex}"
+  force_destroy = true
+  tags          = module.tags.tags
+}
+
+################################################################################
+## FSX Lustre
+################################################################################
 module "fsx_lustre" {
   source = "../.."
 
@@ -122,7 +110,7 @@ module "fsx_lustre" {
     data_compression_type       = "LZ4"
     data_repository_associations = {
       main = {
-        data_repository_path = "s3://${aws_s3_bucket.this.id}/import"
+        data_repository_path = "s3://${module.s3.bucket_id}/import"
         file_system_path     = "/data"
         s3 = {
           auto_export_policy = {
