@@ -4,7 +4,7 @@
 
 <a href="https://github.com/sourcefuse/terraform-aws-arc-fsx/releases/latest"><img src="https://img.shields.io/github/release/sourcefuse/terraform-aws-arc-fsx.svg?style=for-the-badge" alt="Latest Release"/></a> <a href="https://github.com/sourcefuse/terraform-aws-arc-fsx/commits"><img src="https://img.shields.io/github/last-commit/sourcefuse/terraform-aws-arc-fsx.svg?style=for-the-badge" alt="Last Updated"/></a> ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sourcefuse_terraform-aws-arc-fsx&metric=alert_status&token=f9795bcdfa8a522b86818bff5287cf85038e7d88)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-fsx)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-fsx&token=f9795bcdfa8a522b86818bff5287cf85038e7d88)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-fsx)
 
 ## Introduction
 
