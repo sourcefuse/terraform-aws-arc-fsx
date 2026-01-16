@@ -32,14 +32,14 @@ SourceFuse's AWS Reference Architecture (ARC) Terraform module facilitates the m
 
 | Component | Windows | Lustre | ONTAP | OpenZFS | File Cache |
 |-----------|---------|--------|-------|---------|------------|
-| File Systems | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Volumes | ❌ | ❌ | ✅ | ✅ | ❌ |
-| Storage Virtual Machines | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Snapshots | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Backups | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Data Repository | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Multi-AZ | ✅ | ❌ | ✅ | ✅ | ❌ |
-| S3 Integration | ❌ | ✅ | ❌ | ❌ | ❌ |
+| File Systems | Yes | Yes | Yes | Yes | Yes |
+| Volumes | No | No | Yes | Yes | No |
+| Storage Virtual Machines | No | No | Yes | No | No |
+| Snapshots | No | No | No | Yes | No |
+| Backups | Yes | Yes | Yes | Yes | No |
+| Data Repository | No | Yes | No | No | No |
+| Multi-AZ | Yes | No | Yes | Yes | No |
+| S3 Integration | No | Yes | No | No | No |
 
 ## Usage
 
@@ -61,7 +61,7 @@ module "fsx_windows" {
   deployment_type     = "SINGLE_AZ_2"
 
   active_directory_id = "d-1234567890"
-  
+
   tags = {
     Project = "File Sharing"
   }
