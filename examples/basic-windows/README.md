@@ -46,7 +46,7 @@ terraform destroy
 - 32 GiB is the minimum storage capacity
 - Consider throughput capacity based on your workload requirements
 
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -92,4 +92,4 @@ terraform destroy
 | <a name="output_fsx_dns_name"></a> [fsx\_dns\_name](#output\_fsx\_dns\_name) | FSx DNS name for mounting |
 | <a name="output_fsx_id"></a> [fsx\_id](#output\_fsx\_id) | FSx file system ID |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | Security group ID created for FSx |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

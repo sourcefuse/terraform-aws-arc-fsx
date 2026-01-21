@@ -1,4 +1,4 @@
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -45,4 +45,4 @@
 | <a name="output_root_volume_id"></a> [root\_volume\_id](#output\_root\_volume\_id) | Root volume ID |
 | <a name="output_snapshot_ids"></a> [snapshot\_ids](#output\_snapshot\_ids) | OpenZFS Snapshot IDs |
 | <a name="output_volume_ids"></a> [volume\_ids](#output\_volume\_ids) | OpenZFS Volume IDs |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

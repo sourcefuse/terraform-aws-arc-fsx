@@ -1,4 +1,4 @@
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -49,4 +49,4 @@
 | <a name="output_fsx_dns_name"></a> [fsx\_dns\_name](#output\_fsx\_dns\_name) | FSx DNS name for mounting |
 | <a name="output_fsx_id"></a> [fsx\_id](#output\_fsx\_id) | FSx file system ID |
 | <a name="output_lustre_mount_name"></a> [lustre\_mount\_name](#output\_lustre\_mount\_name) | Lustre mount name |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

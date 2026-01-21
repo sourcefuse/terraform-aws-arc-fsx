@@ -1,4 +1,4 @@
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -44,4 +44,4 @@
 | <a name="output_ontap_endpoints"></a> [ontap\_endpoints](#output\_ontap\_endpoints) | ONTAP endpoints |
 | <a name="output_svm_ids"></a> [svm\_ids](#output\_svm\_ids) | Storage Virtual Machine IDs |
 | <a name="output_volume_ids"></a> [volume\_ids](#output\_volume\_ids) | ONTAP Volume IDs |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

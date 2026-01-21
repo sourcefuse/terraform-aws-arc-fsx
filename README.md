@@ -192,7 +192,7 @@ For issues and questions:
 - Check the [examples](./examples/) directory for common use cases
 - Review AWS FSx documentation for service-specific requirements
 
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -295,7 +295,7 @@ No modules.
 | <a name="output_openzfs_volume_ids"></a> [openzfs\_volume\_ids](#output\_openzfs\_volume\_ids) | IDs of OpenZFS Volumes |
 | <a name="output_tags"></a> [tags](#output\_tags) | Tags applied to the FSx file system |
 | <a name="output_windows_remote_administration_endpoint"></a> [windows\_remote\_administration\_endpoint](#output\_windows\_remote\_administration\_endpoint) | Remote administration endpoint for Windows file system |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Development
 

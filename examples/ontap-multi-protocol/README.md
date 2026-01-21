@@ -1,4 +1,4 @@
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -43,4 +43,4 @@
 | <a name="output_fsx_id"></a> [fsx\_id](#output\_fsx\_id) | FSx file system ID |
 | <a name="output_ontap_endpoints"></a> [ontap\_endpoints](#output\_ontap\_endpoints) | ONTAP endpoints |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | Security group ID |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
