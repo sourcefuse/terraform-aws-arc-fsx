@@ -27,7 +27,8 @@ To use the module in your Terraform configuration, include the following source 
 
 ```hcl
 module "arc-fsx" {
-  source = "path/to/terraform-aws-arc-fsx"
+  source   = "sourcefuse/arc-fsx/aws"
+  version  = "0.0.1"
   
   # Required variables
   name             = "my-fsx"

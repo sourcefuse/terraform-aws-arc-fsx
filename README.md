@@ -47,7 +47,8 @@ SourceFuse's AWS Reference Architecture (ARC) Terraform module facilitates the m
 
 ```hcl
 module "fsx_windows" {
-  source = "path/to/fsx-module"
+  source   = "sourcefuse/arc-fsx/aws"
+  version  = "0.0.1"
 
   name        = "my-windows-fsx"
   environment = "prod"
@@ -72,7 +73,8 @@ module "fsx_windows" {
 
 ```hcl
 module "fsx_ontap" {
-  source = "path/to/fsx-module"
+  source   = "sourcefuse/arc-fsx/aws"
+  version  = "0.0.1"
 
   name        = "my-ontap-fsx"
   environment = "prod"
@@ -112,7 +114,8 @@ module "fsx_ontap" {
 
 ```hcl
 module "fsx_openzfs" {
-  source = "path/to/fsx-module"
+  source   = "sourcefuse/arc-fsx/aws"
+  version  = "0.0.1"
 
   name        = "my-openzfs-fsx"
   environment = "prod"
