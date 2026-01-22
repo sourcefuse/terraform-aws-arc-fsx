@@ -2,7 +2,7 @@
 data "aws_vpc" "ascend" {
   filter {
     name   = "tag:Name"
-    values = ["ascend-vpc"]
+    values = ["arc-vpc"]
   }
 }
 
@@ -15,7 +15,7 @@ data "aws_subnets" "private" {
 
   filter {
     name   = "tag:Name"
-    values = ["ascend-private-subnet-1a"]
+    values = ["arc-private-subnet-1a"]
   }
 }
 

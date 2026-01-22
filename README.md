@@ -173,25 +173,6 @@ module "fsx_openzfs" {
 - Network access is restricted to specified CIDR blocks
 - Backup encryption is enabled by default
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## License
-
-This module is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Support
-
-For issues and questions:
-- Create an issue in this repository
-- Check the [examples](./examples/) directory for common use cases
-- Review AWS FSx documentation for service-specific requirements
-
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
