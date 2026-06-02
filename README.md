@@ -21,11 +21,11 @@
 
 Creates Amazon FSx file systems — Windows File Server, Lustre, ONTAP, and OpenZFS — with VPC, security groups, and backup configuration.
 
-For more information about this repository and its usage, please see [Terraform AWS FSX Usage Guide](https://github.com/sourcefuse/terraform-aws-arc-fsx/blob/main/docs/module-usage-guide/README.md).
-
 ## What It Does
 
 This module provides comprehensive support for multiple Amazon FSx file system types and related storage management capabilities, enabling flexible, secure, and scalable deployments.
+
+For more information about this repository and its usage, please see [Terraform AWS FSX Usage Guide](https://github.com/sourcefuse/terraform-aws-arc-fsx/blob/main/docs/module-usage-guide/README.md).
 
 ### Supported FSx Types
 
