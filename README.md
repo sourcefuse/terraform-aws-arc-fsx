@@ -17,6 +17,9 @@
 
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-fsx&token=f9795bcdfa8a522b86818bff5287cf85038e7d88)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-fsx)
 
+> [!TIP]
+> 🤖 **New:** Use this module with AI assistants via the [ARC IaC MCP Server](https://github.com/sourcefuse/arc-iac-mcp) — search, scaffold, and security-scan ARC modules from natural language. [Quick setup ↓](#ai-assistant-integration-arc-iac-mcp)
+
 ## Overview
 
 Creates Amazon FSx file systems — Windows File Server, Lustre, ONTAP, and OpenZFS — with VPC, security groups, and backup configuration.
